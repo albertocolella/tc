@@ -1,5 +1,5 @@
 <?php
-// /example_working.php/address?id=0
+// /example.php/address?id=0
 $path = '';
 if (isset($_SERVER['PATH_INFO'])) {
     $path = $_SERVER['PATH_INFO'];
@@ -17,10 +17,15 @@ class Controller
   var $addresses = [];
 
   function ex()
-  {
-    $this->rcd();
-    if (!isset($_GET['id']) || !isset($this->addresses[$_GET['id']])) {
-        return json_encode(null);
+  {    
+    if (!$this->rcd()){
+        return json_encode(['error' => "No file found"]);
+    }
+    if(!isset($_GET['id'])) {
+        return json_encode(['error' => "No id provided"]);
+    }
+    if(!isset($this->addresses[$_GET['id']])) {
+        return json_encode(['error' => "Wrong id provided"]);
     }
     $id = $_GET['id'];
     $address = $this->addresses[$id];
@@ -29,6 +34,9 @@ class Controller
 
   function rcd()
   {
+    if(!file_exists('example.csv')){
+        return false;
+    }
     $file = fopen('example.csv', 'r');
     while (($line = fgetcsv($file)) !== FALSE) {
         $this->addresses[] = [
@@ -37,8 +45,8 @@ class Controller
             'street' => $line[2]
         ];
     }
-
     fclose($file);
+    return true;
   }
 }
 ?>
